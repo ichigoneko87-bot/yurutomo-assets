@@ -1,0 +1,1 @@
+# yurutomo-assets
