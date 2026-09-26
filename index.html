@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja" translate="no">
 <head>
@@ -2285,8 +2284,10 @@ function applyAppearance(
 
     if(url){
       image.src=url;
+      image.classList.remove("hidden");
     }else{
       image.removeAttribute("src");
+      image.classList.add("hidden");
     }
   }
 
