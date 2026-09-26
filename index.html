@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja" translate="no">
 <head>
@@ -338,6 +339,13 @@ input{
   height:100%;
 
   object-fit:contain;
+}
+
+.part-thumb.empty-thumb{
+  display:grid;
+  place-items:center;
+  color:var(--muted);
+  font-size:26px;
 }
 
 .part-thumb.eye-thumb img{
@@ -1969,16 +1977,21 @@ const ASSETS={
   },
 
   back:{
+    none:"",
     long:
     "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/black%20long%20hair_back.png"
   },
 
   front:{
+    none:"",
     bangs:
-    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/black%20hair_front.png"
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/black%20hair_front.png",
+    pinkTwintail:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/pink%20hair_front.png"
   },
 
   eyes:{
+    none:"",
 
     gentle:
     "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/brown_eyes.png",
@@ -1992,6 +2005,7 @@ const ASSETS={
   },
 
   mouth:{
+    none:"",
 
     speaking:
     "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/speaking_mouth.png",
@@ -2022,6 +2036,10 @@ const OPTIONS={
 
   back:[
     {
+      value:"none",
+      label:"なし"
+    },
+    {
       value:"long",
       label:"黒髪ロング"
     }
@@ -2029,12 +2047,24 @@ const OPTIONS={
 
   front:[
     {
+      value:"none",
+      label:"なし"
+    },
+    {
       value:"bangs",
       label:"ぱっつん"
+    },
+    {
+      value:"pinkTwintail",
+      label:"ピンクツインテール"
     }
   ],
 
   eyes:[
+    {
+      value:"none",
+      label:"なし"
+    },
     {
       value:"gentle",
       label:"おっとり目"
@@ -2050,6 +2080,10 @@ const OPTIONS={
   ],
 
   mouth:[
+    {
+      value:"none",
+      label:"なし"
+    },
     {
       value:"speaking",
       label:"おしゃべり"
@@ -2245,15 +2279,18 @@ function applyAppearance(
   if(!element)
     return;
 
+  function setLayer(type){
+    const image=element.querySelector(`.layer-${type}`);
+    const url=ASSETS[type][appearance[type]];
 
-  element
-    .querySelector(
-      ".layer-back"
-    )
-    .src=
-    ASSETS.back[
-      appearance.back
-    ];
+    if(url){
+      image.src=url;
+    }else{
+      image.removeAttribute("src");
+    }
+  }
+
+  setLayer("back");
 
 
   element
@@ -2266,34 +2303,9 @@ function applyAppearance(
     ];
 
 
-  element
-    .querySelector(
-      ".layer-eyes"
-    )
-    .src=
-    ASSETS.eyes[
-      appearance.eyes
-    ];
-
-
-  element
-    .querySelector(
-      ".layer-mouth"
-    )
-    .src=
-    ASSETS.mouth[
-      appearance.mouth
-    ];
-
-
-  element
-    .querySelector(
-      ".layer-front"
-    )
-    .src=
-    ASSETS.front[
-      appearance.front
-    ];
+  setLayer("eyes");
+  setLayer("mouth");
+  setLayer("front");
 
 }
 
@@ -2400,9 +2412,9 @@ function renderOptions(
             ''
           }
 
-          <div class="part-thumb ${optionPreviewClass(type)}">
+          <div class="part-thumb ${optionPreviewClass(type)} ${url ? "" : "empty-thumb"}">
 
-            <img src="${url}">
+            ${url ? `<img src="${url}">` : "—"}
 
           </div>
 
