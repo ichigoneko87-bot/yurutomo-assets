@@ -1,0 +1,4311 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google" content="notranslate">
+
+<title>ゆるとも</title>
+
+<style>
+:root{
+  --text:#625a63;
+  --muted:#978d99;
+  --lav:#dac3e8;
+  --lav2:#c7a9dc;
+  --blue:#d8eaf4;
+  --pink:#efd5df;
+  --shadow:0 8px 24px rgba(90,65,95,.13);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  background:#eee8ee;
+  color:var(--text);
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Hiragino Maru Gothic ProN",
+    "Yu Gothic",
+    sans-serif;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+button,input{
+  font:inherit;
+}
+
+button{
+  border:0;
+  color:inherit;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+button:active{
+  transform:scale(.96);
+}
+
+.hidden{
+  display:none !important;
+}
+
+/* =================================
+   9:16 ゲーム画面
+================================= */
+
+#game{
+  position:relative;
+  width:min(100%,430px);
+  aspect-ratio:9 / 16;
+  margin:0 auto;
+  overflow:hidden;
+  background:#fffafd;
+  box-shadow:0 0 24px rgba(70,55,75,.12);
+}
+
+.screen{
+  position:absolute;
+  inset:0;
+  display:none;
+
+  width:100%;
+  height:100%;
+
+  padding:22px 18px 30px;
+
+  overflow-y:auto;
+  overflow-x:hidden;
+
+  background:#fffafd;
+}
+
+.screen.active{
+  display:block;
+}
+
+#home-screen{
+  overflow:hidden;
+}
+
+/* =================================
+   見出し
+================================= */
+
+h1{
+  margin:10px 0 20px;
+  text-align:center;
+  font-size:25px;
+  font-weight:800;
+}
+
+h3{
+  margin:26px 0 12px;
+}
+
+/* =================================
+   共通ボタン
+================================= */
+
+.primary-btn,
+.back-btn,
+.danger-btn{
+  display:block;
+  margin:18px auto;
+  border-radius:999px;
+}
+
+.primary-btn{
+  min-width:140px;
+  padding:14px 34px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #dbc3ea,
+      #ceb0e2
+    );
+
+  box-shadow:
+    0 5px 12px
+    rgba(173,136,195,.22);
+
+  font-weight:750;
+}
+
+.back-btn{
+  padding:11px 25px;
+  background:#eee9ef;
+}
+
+.danger-btn{
+  padding:11px 22px;
+  margin-top:34px;
+
+  background:#f5dde3;
+  color:#915d69;
+
+  font-weight:700;
+}
+
+input{
+  display:block;
+  width:84%;
+
+  margin:18px auto;
+  padding:15px;
+
+  border:2px solid #eadfea;
+  border-radius:20px;
+
+  background:white;
+  text-align:center;
+  color:var(--text);
+  outline:0;
+}
+
+/* =================================
+   キャラクター共通
+================================= */
+
+.character-box,
+.home-character{
+  position:relative;
+  aspect-ratio:1 / 1;
+}
+
+.character-box{
+  width:min(70vw,300px);
+  margin:auto;
+}
+
+.character-layer{
+  position:absolute;
+  inset:0;
+
+  width:100%;
+  height:100%;
+
+  object-fit:contain;
+
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+.layer-back{
+  z-index:1;
+}
+
+.layer-body{
+  z-index:2;
+}
+
+.layer-eyes{
+  z-index:3;
+}
+
+.layer-mouth{
+  z-index:4;
+}
+
+.layer-front{
+  z-index:5;
+}
+
+/* =================================
+   作成画面
+================================= */
+
+.creator-card{
+  margin:0 2px 18px;
+  padding:12px 8px;
+
+  border:2px solid #efe3ed;
+  border-radius:30px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f8edf5,
+      #fffafd
+    );
+
+  box-shadow:var(--shadow);
+}
+
+.creator-preview{
+  min-height:310px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.tabs{
+  display:flex;
+  justify-content:center;
+
+  gap:8px;
+  flex-wrap:wrap;
+
+  margin:15px 0;
+}
+
+.tab{
+  padding:9px 14px;
+  border-radius:999px;
+
+  background:#eee9ef;
+
+  font-size:13px;
+  font-weight:650;
+}
+
+.tab.selected{
+  background:#dac1e6;
+}
+
+.part-options{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+
+  gap:10px;
+
+  min-height:118px;
+
+  margin-bottom:20px;
+}
+
+.part-card{
+  position:relative;
+
+  width:105px;
+  min-height:110px;
+
+  padding:9px;
+
+  border:2px solid transparent;
+  border-radius:22px;
+
+  background:#f7f1f8;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    transform .15s ease;
+}
+
+.part-card.selected{
+  border-color:#c49bd5;
+  background:#f3e7f7;
+}
+
+.part-thumb{
+  position:relative;
+
+  width:72px;
+  height:72px;
+
+  margin:auto;
+
+  overflow:hidden;
+
+  border-radius:15px;
+
+  background:rgba(255,255,255,.7);
+}
+
+.part-thumb img{
+  position:absolute;
+  inset:0;
+
+  width:100%;
+  height:100%;
+
+  object-fit:contain;
+}
+
+.part-thumb.eye-thumb img{
+  transform:scale(2.2);
+}
+
+.part-thumb.mouth-thumb img{
+  transform:scale(3.5);
+}
+
+.part-label{
+  display:block;
+
+  margin-top:6px;
+
+  font-size:11px;
+  font-weight:700;
+
+  white-space:nowrap;
+}
+
+.check{
+  position:absolute;
+
+  top:6px;
+  right:6px;
+
+  width:19px;
+  height:19px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:50%;
+
+  background:#cba8d8;
+  color:white;
+
+  font-size:11px;
+  font-weight:900;
+}
+
+.info-card{
+  width:94%;
+
+  margin:76px auto 28px;
+  padding:20px;
+
+  border-radius:25px;
+
+  background:#f5edf8;
+
+  text-align:center;
+  line-height:1.7;
+}
+
+/* =================================
+   HOME背景
+================================= */
+
+#home-screen{
+  padding:0;
+
+  background-image:
+    linear-gradient(
+      rgba(255,250,253,.04),
+      rgba(255,250,253,.04)
+    ),
+    url("https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/room1.PNG");
+
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+}
+
+#home-screen::after{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  z-index:1;
+
+  pointer-events:none;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,250,253,.16) 0%,
+      rgba(255,250,253,0) 30%,
+      rgba(255,250,253,0) 66%,
+      rgba(255,249,252,.12) 100%
+    );
+}
+
+.home-ui{
+  position:absolute;
+  inset:0;
+
+  z-index:10;
+
+  padding:12px 14px;
+}
+
+/* =================================
+   上部UI
+================================= */
+
+.topbar{
+  height:74px;
+
+  display:flex;
+
+  justify-content:space-between;
+  align-items:center;
+
+  gap:10px;
+}
+
+.glass{
+  background:rgba(255,255,255,.77);
+
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+
+  border:
+    1px solid
+    rgba(255,255,255,.72);
+
+  box-shadow:
+    0 5px 18px
+    rgba(106,83,106,.09);
+}
+
+.datetime-card{
+  min-width:90px;
+  padding:8px 12px;
+  border-radius:18px;
+}
+
+#home-date{
+  font-size:12px;
+  color:var(--muted);
+}
+
+#home-time{
+  font-size:20px;
+  font-weight:800;
+}
+
+.level-card{
+  width:174px;
+
+  padding:9px 12px 8px;
+
+  border-radius:19px;
+
+  text-align:left;
+}
+
+.level-top{
+  display:flex;
+  justify-content:space-between;
+
+  font-size:13px;
+  font-weight:750;
+}
+
+.level-heart{
+  color:#ca89aa;
+}
+
+.home-xp-track{
+  height:7px;
+
+  margin-top:7px;
+
+  border-radius:999px;
+
+  background:rgba(224,211,227,.88);
+
+  overflow:hidden;
+}
+
+#home-xp-fill{
+  width:0;
+  height:100%;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #d7a9cd,
+      #bca4df
+    );
+}
+
+#home-next-xp{
+  display:block;
+
+  margin-top:4px;
+
+  text-align:right;
+
+  font-size:10px;
+  color:var(--muted);
+}
+
+/* =================================
+   HOMEキャラ
+================================= */
+
+.home-character{
+  position:absolute;
+
+  z-index:5;
+
+  left:50%;
+
+  bottom:260px;
+
+  width:56%;
+  max-width:245px;
+
+  transform:translateX(-50%);
+
+  animation:
+    yuruFloat
+    3.5s
+    ease-in-out
+    infinite;
+
+  filter:
+    drop-shadow(
+      0 6px 7px
+      rgba(100,75,90,.08)
+    );
+}
+
+@keyframes yuruFloat{
+
+  0%,100%{
+    transform:
+      translateX(-50%)
+      translateY(0);
+  }
+
+  50%{
+    transform:
+      translateX(-50%)
+      translateY(-4px);
+  }
+
+}
+
+/* =================================
+   会話
+================================= */
+
+.dialogue-window{
+  position:absolute;
+
+  z-index:12;
+
+  left:18px;
+  right:18px;
+
+  bottom:185px;
+
+  min-height:84px;
+
+  padding:13px 17px;
+
+  border-radius:24px;
+
+  background:rgba(255,255,255,.91);
+
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+
+  border:
+    1.5px solid
+    rgba(238,224,235,.95);
+
+  box-shadow:
+    0 8px 22px
+    rgba(90,65,95,.12);
+
+  transition:
+    opacity .35s ease,
+    transform .35s ease;
+}
+
+.dialogue-window.dialogue-hidden{
+  opacity:0;
+  transform:translateY(8px);
+  pointer-events:none;
+}
+
+.dialogue-name{
+  font-size:14px;
+  font-weight:850;
+}
+
+.dialogue-window p{
+  margin:6px 0 0;
+
+  font-size:16px;
+  line-height:1.5;
+}
+
+/* =================================
+   HOME行動
+================================= */
+
+.home-actions{
+  position:absolute;
+
+  z-index:13;
+
+  left:14px;
+  right:14px;
+
+  bottom:22px;
+
+  min-height:164px;
+
+  padding-top:64px;
+}
+
+.action-popup{
+  position:absolute;
+
+  top:0;
+  left:50%;
+
+  width:326px;
+  max-width:100%;
+
+  transform:translateX(-50%);
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:8px;
+
+  padding:11px;
+
+  border-radius:22px;
+
+  background:rgba(255,255,255,.95);
+
+  box-shadow:var(--shadow);
+}
+
+.action-popup button{
+  padding:10px 3px;
+
+  border-radius:15px;
+
+  white-space:nowrap;
+
+  font-size:13px;
+  font-weight:700;
+}
+
+#food-button{
+  background:#fae7cc;
+}
+
+#play-button{
+  background:#e0edd9;
+}
+
+#outing-button{
+  background:#dde8f6;
+}
+
+.main-actions{
+  display:grid;
+
+  grid-template-columns:
+    1fr
+    1.18fr
+    1fr;
+
+  gap:9px;
+
+  align-items:end;
+}
+
+.game-btn{
+  position:relative;
+
+  min-height:68px;
+
+  padding:9px 4px 8px;
+
+  border-radius:22px;
+
+  background:rgba(255,255,255,.84);
+
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+
+  box-shadow:
+    0 6px 15px
+    rgba(91,66,96,.10);
+}
+
+.game-btn.primary-action{
+  min-height:78px;
+
+  background:rgba(212,235,246,.94);
+}
+
+.game-btn .icon{
+  display:block;
+
+  width:25px;
+  height:25px;
+
+  margin:0 auto 4px;
+}
+
+.game-btn.primary-action .icon{
+  width:30px;
+  height:30px;
+}
+
+.game-btn .label{
+  display:block;
+
+  font-size:13px;
+  font-weight:750;
+}
+
+.bottom-nav{
+  display:grid;
+
+  grid-template-columns:
+    1fr
+    1fr;
+
+  gap:11px;
+
+  margin:
+    6px
+    49px
+    0;
+}
+
+.bottom-nav .game-btn{
+  min-height:55px;
+  padding-top:8px;
+}
+
+.bottom-nav .icon{
+  width:21px;
+  height:21px;
+}
+
+/* =================================
+   浮き表示
+================================= */
+
+.float-feedback{
+  position:absolute;
+
+  z-index:30;
+
+  left:50%;
+
+  bottom:278px;
+
+  transform:translateX(-50%);
+
+  pointer-events:none;
+}
+
+.float-line{
+  margin:4px;
+
+  padding:6px 11px;
+
+  border-radius:999px;
+
+  background:rgba(255,255,255,.95);
+
+  box-shadow:
+    0 4px 13px
+    rgba(80,60,85,.12);
+
+  font-size:12px;
+  font-weight:800;
+
+  white-space:nowrap;
+
+  animation:
+    gainFloat
+    1.4s
+    ease-out
+    forwards;
+}
+
+@keyframes gainFloat{
+
+  0%{
+    opacity:0;
+    transform:translateY(10px);
+  }
+
+  20%{
+    opacity:1;
+  }
+
+  100%{
+    opacity:0;
+    transform:translateY(-35px);
+  }
+
+}
+
+/* =================================
+   その他
+================================= */
+
+.panel-screen{
+  text-align:center;
+}
+
+.card{
+  margin:35px 0;
+
+  padding:28px 20px;
+
+  border-radius:29px;
+
+  background:white;
+
+  box-shadow:var(--shadow);
+}
+
+.big-number{
+  margin:18px;
+  font-size:49px;
+}
+
+.relation-max{
+  margin-left:7px;
+  font-size:17px;
+}
+
+.play-choice{
+  display:flex;
+  align-items:center;
+
+  gap:13px;
+
+  width:91%;
+
+  margin:11px auto;
+  padding:17px 22px;
+
+  border-radius:23px;
+
+  background:#e8daf0;
+
+  font-size:16px;
+}
+
+/* =================================
+   思い出
+================================= */
+
+.memory-list{
+  margin:20px 0;
+
+  padding-left:20px;
+
+  border-left:
+    4px solid
+    #dec8e5;
+
+  text-align:left;
+}
+
+.memory-item{
+  position:relative;
+
+  margin-bottom:14px;
+
+  padding:14px;
+
+  border-radius:19px;
+
+  background:white;
+
+  box-shadow:
+    0 4px 11px
+    rgba(100,70,105,.05);
+}
+
+.memory-item::before{
+  content:"";
+
+  position:absolute;
+
+  left:-29px;
+  top:20px;
+
+  width:13px;
+  height:13px;
+
+  border-radius:50%;
+
+  background:#cfabd9;
+}
+
+.memory-date{
+  margin-bottom:4px;
+
+  font-size:11px;
+  color:var(--muted);
+}
+
+/* =================================
+   レベルアップ
+================================= */
+
+.level-overlay{
+  position:absolute;
+
+  z-index:1000;
+
+  inset:0;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(90,71,91,.13);
+
+  backdrop-filter:blur(2px);
+}
+
+.level-popup{
+  width:285px;
+
+  padding:30px 20px;
+
+  border-radius:32px;
+
+  background:#fffafd;
+
+  box-shadow:
+    0 18px 45px
+    rgba(95,69,101,.18);
+
+  text-align:center;
+}
+
+.level-title{
+  font-size:13px;
+
+  letter-spacing:.18em;
+
+  color:#b18bc7;
+
+  font-weight:900;
+}
+
+.level-num{
+  margin:7px 0;
+
+  font-size:27px;
+  font-weight:900;
+}
+
+.unlock-text{
+  margin-top:8px;
+
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* =================================
+   ユーザー情報
+================================= */
+
+.user-card{
+  margin-top:24px;
+
+  padding:25px 19px;
+
+  border-radius:29px;
+
+  background:white;
+
+  box-shadow:var(--shadow);
+}
+
+.user-name-display{
+  margin-bottom:5px;
+
+  font-size:24px;
+  font-weight:850;
+}
+
+/* ★追加：ユーザー情報XPゲージ */
+
+.user-xp-area{
+  width:88%;
+  margin:14px auto 22px;
+}
+
+.user-xp-track{
+  width:100%;
+  height:10px;
+
+  border-radius:999px;
+
+  background:#e8dde9;
+
+  overflow:hidden;
+}
+
+#user-xp-fill{
+  width:0;
+  height:100%;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #d7a9cd,
+      #bca4df
+    );
+
+  transition:width .3s ease;
+}
+
+#user-xp-next{
+  margin-top:7px;
+
+  text-align:right;
+
+  font-size:12px;
+
+  color:var(--muted);
+}
+
+.stats-grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,1fr);
+
+  gap:11px;
+
+  margin-top:20px;
+}
+
+.stat-item{
+  padding:14px 8px;
+
+  border-radius:18px;
+
+  background:#f8f3f8;
+}
+
+.stat-label{
+  display:block;
+
+  margin-bottom:5px;
+
+  color:var(--muted);
+
+  font-size:11px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<!-- =================================
+     キャラ作成
+================================= -->
+
+<section id="create-screen" class="screen active">
+
+<h1>ゆるともを作ろう</h1>
+
+<div class="creator-card">
+
+  <div class="creator-preview">
+
+    <div
+      class="character-box character-stack"
+      data-character="creator"
+    >
+
+      <img class="character-layer layer-back">
+      <img class="character-layer layer-body">
+      <img class="character-layer layer-eyes">
+      <img class="character-layer layer-mouth">
+      <img class="character-layer layer-front">
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="tabs creator-tabs">
+
+  <button class="tab selected" data-part="body">
+    からだ
+  </button>
+
+  <button class="tab" data-part="back">
+    後ろ髪
+  </button>
+
+  <button class="tab" data-part="front">
+    前髪
+  </button>
+
+  <button class="tab" data-part="eyes">
+    目
+  </button>
+
+  <button class="tab" data-part="mouth">
+    口
+  </button>
+
+</div>
+
+
+<div
+  id="part-options"
+  class="part-options"
+></div>
+
+
+<button
+  id="to-name"
+  class="primary-btn"
+>
+すすむ
+</button>
+
+</section>
+
+
+<!-- =================================
+     名前
+================================= -->
+
+<section id="name-screen" class="screen">
+
+<h1>名前をつけよう</h1>
+
+<div class="creator-card">
+
+  <div class="creator-preview">
+
+    <div
+      class="character-box character-stack"
+      data-character="name"
+    >
+
+      <img class="character-layer layer-back">
+      <img class="character-layer layer-body">
+      <img class="character-layer layer-eyes">
+      <img class="character-layer layer-mouth">
+      <img class="character-layer layer-front">
+
+    </div>
+
+  </div>
+
+</div>
+
+<input
+  id="name-input"
+  maxlength="10"
+  placeholder="ゆるともの名前"
+>
+
+<button
+  id="to-user-name"
+  class="primary-btn"
+>
+すすむ
+</button>
+
+<button
+  id="back-create"
+  class="back-btn"
+>
+もどる
+</button>
+
+</section>
+
+
+<!-- =================================
+     ユーザー名
+================================= -->
+
+<section id="user-name-screen" class="screen">
+
+<h1>
+あなたの名前を教えてね
+</h1>
+
+<div class="info-card">
+ゆるともがあなたを呼ぶ名前だよ。
+</div>
+
+<input
+  id="user-name-input"
+  maxlength="10"
+  placeholder="あなたの名前"
+>
+
+<button
+  id="start-game"
+  class="primary-btn"
+>
+はじめる
+</button>
+
+<button
+  id="back-name"
+  class="back-btn"
+>
+もどる
+</button>
+
+</section>
+
+
+<!-- =================================
+     HOME
+================================= -->
+
+<section id="home-screen" class="screen">
+
+<div class="home-ui">
+
+<header class="topbar">
+
+  <div class="datetime-card glass">
+
+    <div id="home-date"></div>
+
+    <div id="home-time"></div>
+
+  </div>
+
+  <button
+    id="user-info-button"
+    class="level-card glass"
+  >
+
+    <div class="level-top">
+
+      <span>
+
+        <span class="level-heart">
+          ♥
+        </span>
+
+        お世話 Lv.
+        <span id="level">1</span>
+
+      </span>
+
+      <span>›</span>
+
+    </div>
+
+    <div class="home-xp-track">
+
+      <div id="home-xp-fill"></div>
+
+    </div>
+
+    <small id="home-next-xp"></small>
+
+  </button>
+
+</header>
+
+
+<div
+  class="home-character character-stack"
+  data-character="home"
+>
+
+  <img class="character-layer layer-back">
+  <img class="character-layer layer-body">
+  <img class="character-layer layer-eyes">
+  <img class="character-layer layer-mouth">
+  <img class="character-layer layer-front">
+
+</div>
+
+
+<div class="dialogue-window">
+
+  <div class="dialogue-name">
+
+    <span id="character-name">
+      ？？？
+    </span>
+
+  </div>
+
+  <p id="dialogue">
+    よろしく〜
+  </p>
+
+</div>
+
+
+<div
+  id="float-feedback"
+  class="float-feedback"
+></div>
+
+
+<div class="home-actions">
+
+  <div
+    id="action-popup"
+    class="action-popup hidden"
+  >
+
+    <button id="food-button">
+      🍚 ごはん
+    </button>
+
+    <button id="play-button">
+      ✿ 遊ぶ
+    </button>
+
+    <button id="outing-button">
+      ↗ おでかけ
+    </button>
+
+  </div>
+
+
+  <div class="main-actions">
+
+    <button
+      id="talk-button"
+      class="game-btn"
+    >
+
+      <svg
+        class="icon"
+        viewBox="0 0 24 24"
+      >
+
+        <path
+          d="M4 5h16v11H9l-5 4z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+
+      </svg>
+
+      <span class="label">
+        話す
+      </span>
+
+    </button>
+
+
+    <button
+      id="action-button"
+      class="game-btn primary-action"
+    >
+
+      <svg
+        class="icon"
+        viewBox="0 0 24 24"
+      >
+
+        <path
+          d="M12 2l2.5 6.4L21 11l-6.5 2.6L12 20l-2.5-6.4L3 11l6.5-2.6z"
+          fill="currentColor"
+        />
+
+      </svg>
+
+      <span class="label">
+        行動
+      </span>
+
+    </button>
+
+
+    <button
+      id="customize-button"
+      class="game-btn"
+    >
+
+      <svg
+        class="icon"
+        viewBox="0 0 24 24"
+      >
+
+        <path
+          d="M8 5c0-2 1.5-3 4-3s4 1 4 3l4 3-3 4-2-1v9H9v-9l-2 1-3-4z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        />
+
+      </svg>
+
+      <span class="label">
+        着替え
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <div class="bottom-nav">
+
+    <button
+      id="memory-button"
+      class="game-btn"
+    >
+
+      <svg
+        class="icon"
+        viewBox="0 0 24 24"
+      >
+
+        <rect
+          x="3"
+          y="4"
+          width="18"
+          height="16"
+          rx="3"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+
+      </svg>
+
+      <span class="label">
+        思い出
+      </span>
+
+    </button>
+
+
+    <button
+      id="relation-button"
+      class="game-btn"
+    >
+
+      <svg
+        class="icon"
+        viewBox="0 0 24 24"
+      >
+
+        <path
+          d="M12 20S4 15 4 9a4 4 0 018-1 4 4 0 018 1c0 6-8 11-8 11z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+
+      </svg>
+
+      <span class="label">
+        関係
+      </span>
+
+    </button>
+
+  </div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =================================
+     遊ぶ
+================================= -->
+
+<section
+  id="play-screen"
+  class="screen panel-screen"
+>
+
+<h1>
+なにして遊ぶ？
+</h1>
+
+<button
+  class="play-choice"
+  data-play="お絵描き"
+>
+🎨 お絵描き
+</button>
+
+<button
+  class="play-choice"
+  data-play="読書"
+>
+📖 読書
+</button>
+
+<button
+  class="play-choice"
+  data-play="ボール遊び"
+>
+⚽ ボール遊び
+</button>
+
+<button class="back-home back-btn">
+もどる
+</button>
+
+</section>
+
+
+<!-- =================================
+     関係
+================================= -->
+
+<section
+  id="relation-screen"
+  class="screen panel-screen"
+>
+
+<h1>関係</h1>
+
+<div class="card">
+
+  <h2 id="relation-name"></h2>
+
+  <p class="big-number">
+
+    <span id="relation-value">
+      0
+    </span>
+
+    <span class="relation-max">
+      / 100
+    </span>
+
+  </p>
+
+  <p id="relation-stage"></p>
+
+  <p>
+
+    出会って
+
+    <span id="days-together">
+      1
+    </span>
+
+    日
+
+  </p>
+
+</div>
+
+<button class="back-home back-btn">
+もどる
+</button>
+
+</section>
+
+
+<!-- =================================
+     思い出
+================================= -->
+
+<section
+  id="memory-screen"
+  class="screen panel-screen"
+>
+
+<h1>思い出</h1>
+
+<div
+  id="memory-list"
+  class="memory-list"
+></div>
+
+<button class="back-home back-btn">
+もどる
+</button>
+
+</section>
+
+
+<!-- =================================
+     着替え
+================================= -->
+
+<section
+  id="customize-screen"
+  class="screen panel-screen"
+>
+
+<h1>着替え</h1>
+
+<div class="creator-card">
+
+  <div class="creator-preview">
+
+    <div
+      class="character-box character-stack"
+      data-character="custom"
+    >
+
+      <img class="character-layer layer-back">
+      <img class="character-layer layer-body">
+      <img class="character-layer layer-eyes">
+      <img class="character-layer layer-mouth">
+      <img class="character-layer layer-front">
+
+    </div>
+
+  </div>
+
+</div>
+
+<h3>名前</h3>
+
+<input
+  id="rename-input"
+  maxlength="10"
+>
+
+<h3>
+見た目
+</h3>
+
+<div class="tabs custom-tabs">
+
+  <button
+    class="tab selected"
+    data-custom="body"
+  >
+    からだ
+  </button>
+
+  <button
+    class="tab"
+    data-custom="back"
+  >
+    後ろ髪
+  </button>
+
+  <button
+    class="tab"
+    data-custom="front"
+  >
+    前髪
+  </button>
+
+  <button
+    class="tab"
+    data-custom="eyes"
+  >
+    目
+  </button>
+
+  <button
+    class="tab"
+    data-custom="mouth"
+  >
+    口
+  </button>
+
+</div>
+
+<div
+  id="custom-options"
+  class="part-options"
+></div>
+
+<button
+  id="save-customize"
+  class="primary-btn"
+>
+決定
+</button>
+
+<button
+  id="reset-game"
+  class="danger-btn"
+>
+最初から作り直す
+</button>
+
+<button class="back-home back-btn">
+もどる
+</button>
+
+</section>
+
+
+<!-- =================================
+     ユーザー情報
+================================= -->
+
+<section
+  id="user-info-screen"
+  class="screen panel-screen"
+>
+
+<h1>
+ユーザー情報
+</h1>
+
+<div class="user-card">
+
+  <div class="user-name-display">
+
+    <span id="user-info-name"></span>
+
+  </div>
+
+  <p>
+
+    お世話 Lv.
+
+    <span id="user-info-level"></span>
+
+  </p>
+
+  <p>
+
+    XP：
+
+    <span id="user-info-xp"></span>
+
+  </p>
+
+
+  <!-- ★追加：ユーザー情報XPゲージ -->
+
+  <div class="user-xp-area">
+
+    <div class="user-xp-track">
+
+      <div id="user-xp-fill"></div>
+
+    </div>
+
+    <div id="user-xp-next"></div>
+
+  </div>
+
+
+  <div class="stats-grid">
+
+    <div class="stat-item">
+
+      <span class="stat-label">
+        一緒に
+      </span>
+
+      <strong>
+
+        <span id="user-info-days"></span>
+
+        日
+
+      </strong>
+
+    </div>
+
+
+    <div class="stat-item">
+
+      <span class="stat-label">
+        話した
+      </span>
+
+      <strong>
+
+        <span id="talk-count"></span>
+
+        回
+
+      </strong>
+
+    </div>
+
+
+    <div class="stat-item">
+
+      <span class="stat-label">
+        ごはん
+      </span>
+
+      <strong>
+
+        <span id="food-count"></span>
+
+        回
+
+      </strong>
+
+    </div>
+
+
+    <div class="stat-item">
+
+      <span class="stat-label">
+        遊んだ
+      </span>
+
+      <strong>
+
+        <span id="play-count"></span>
+
+        回
+
+      </strong>
+
+    </div>
+
+
+    <div class="stat-item">
+
+      <span class="stat-label">
+        おでかけ
+      </span>
+
+      <strong>
+
+        <span id="outing-count"></span>
+
+        回
+
+      </strong>
+
+    </div>
+
+  </div>
+
+</div>
+
+<button class="back-home back-btn">
+もどる
+</button>
+
+</section>
+
+
+<!-- =================================
+     LEVEL UP
+================================= -->
+
+<div
+  id="level-overlay"
+  class="level-overlay hidden"
+>
+
+<div class="level-popup">
+
+  <div class="level-title">
+    LEVEL UP
+  </div>
+
+  <div class="level-num">
+
+    お世話 Lv.
+
+    <span id="levelup-number"></span>
+
+  </div>
+
+  <div
+    id="levelup-unlock"
+    class="unlock-text"
+  ></div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =================================
+   画像URL
+================================= */
+
+const ASSETS={
+
+  body:{
+    default:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/body.png"
+  },
+
+  back:{
+    long:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/black%20long%20hair_back.png"
+  },
+
+  front:{
+    bangs:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/black%20hair_front.png"
+  },
+
+  eyes:{
+
+    gentle:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/brown_eyes.png",
+
+    droopy:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/droopy_eyes.png",
+
+    upturned:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/upturned_eyes.png"
+
+  },
+
+  mouth:{
+
+    speaking:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/speaking_mouth.png",
+
+    smile:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/smile%20closed_mouth.png",
+
+    shun:
+    "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/shun_mouth.png"
+
+  }
+
+};
+
+
+/* =================================
+   選択肢
+================================= */
+
+const OPTIONS={
+
+  body:[
+    {
+      value:"default",
+      label:"からだ"
+    }
+  ],
+
+  back:[
+    {
+      value:"long",
+      label:"黒髪ロング"
+    }
+  ],
+
+  front:[
+    {
+      value:"bangs",
+      label:"ぱっつん"
+    }
+  ],
+
+  eyes:[
+    {
+      value:"gentle",
+      label:"おっとり目"
+    },
+    {
+      value:"droopy",
+      label:"眠い目"
+    },
+    {
+      value:"upturned",
+      label:"つり目"
+    }
+  ],
+
+  mouth:[
+    {
+      value:"speaking",
+      label:"おしゃべり"
+    },
+    {
+      value:"smile",
+      label:"笑い"
+    },
+    {
+      value:"shun",
+      label:"しゅん"
+    }
+  ]
+
+};
+
+
+function defaultAppearance(){
+
+  return{
+
+    body:"default",
+
+    back:"long",
+
+    front:"bangs",
+
+    eyes:"gentle",
+
+    mouth:"speaking"
+
+  };
+
+}
+
+
+/* =================================
+   データ
+================================= */
+
+function initialData(){
+
+  return{
+
+    created:false,
+
+    name:"",
+
+    userName:"",
+
+    appearance:
+      defaultAppearance(),
+
+    relation:0,
+
+    todayRelation:0,
+
+    relationDate:"",
+
+    xp:0,
+
+    level:1,
+
+    startDate:null,
+
+    memories:[],
+
+    counts:{
+      talk:0,
+      food:0,
+      play:0,
+      outing:0
+    },
+
+    firstActions:{
+      talk:false,
+      food:false,
+      play:false,
+      outing:false
+    },
+
+    reachedRelation:[]
+
+  };
+
+}
+
+
+let data;
+
+
+try{
+
+  data=
+    JSON.parse(
+      localStorage.getItem(
+        "yurutomoData"
+      )
+    );
+
+}catch(e){
+
+  data=null;
+
+}
+
+
+if(!data){
+
+  data=
+    initialData();
+
+}
+
+
+data.appearance={
+  ...defaultAppearance(),
+  ...(data.appearance || {})
+};
+
+data.memories ??=[];
+
+data.counts ??={
+  talk:0,
+  food:0,
+  play:0,
+  outing:0
+};
+
+data.firstActions ??={
+  talk:false,
+  food:false,
+  play:false,
+  outing:false
+};
+
+data.reachedRelation ??=[];
+
+data.todayRelation ??=0;
+
+data.relationDate ??="";
+
+data.relation ??=0;
+
+data.xp ??=0;
+
+data.level ??=1;
+
+
+function save(){
+
+  localStorage.setItem(
+    "yurutomoData",
+    JSON.stringify(data)
+  );
+
+}
+
+
+/* =================================
+   作成中データ
+================================= */
+
+let draftAppearance=
+  {
+    ...data.appearance
+  };
+
+
+let customAppearance=
+  {
+    ...data.appearance
+  };
+
+
+let activePart=
+  "body";
+
+
+let activeCustomPart=
+  "body";
+
+
+/* =================================
+   キャラ表示
+================================= */
+
+function applyAppearance(
+  element,
+  appearance
+){
+
+  if(!element)
+    return;
+
+
+  element
+    .querySelector(
+      ".layer-back"
+    )
+    .src=
+    ASSETS.back[
+      appearance.back
+    ];
+
+
+  element
+    .querySelector(
+      ".layer-body"
+    )
+    .src=
+    ASSETS.body[
+      appearance.body
+    ];
+
+
+  element
+    .querySelector(
+      ".layer-eyes"
+    )
+    .src=
+    ASSETS.eyes[
+      appearance.eyes
+    ];
+
+
+  element
+    .querySelector(
+      ".layer-mouth"
+    )
+    .src=
+    ASSETS.mouth[
+      appearance.mouth
+    ];
+
+
+  element
+    .querySelector(
+      ".layer-front"
+    )
+    .src=
+    ASSETS.front[
+      appearance.front
+    ];
+
+}
+
+
+function syncCharacters(){
+
+  applyAppearance(
+    document.querySelector(
+      '[data-character="creator"]'
+    ),
+    draftAppearance
+  );
+
+
+  applyAppearance(
+    document.querySelector(
+      '[data-character="name"]'
+    ),
+    draftAppearance
+  );
+
+
+  applyAppearance(
+    document.querySelector(
+      '[data-character="home"]'
+    ),
+    data.appearance
+  );
+
+
+  applyAppearance(
+    document.querySelector(
+      '[data-character="custom"]'
+    ),
+    customAppearance
+  );
+
+}
+
+
+/* =================================
+   パーツ選択
+================================= */
+
+function optionPreviewClass(
+  type
+){
+
+  if(type==="eyes")
+    return"eye-thumb";
+
+  if(type==="mouth")
+    return"mouth-thumb";
+
+  return"";
+
+}
+
+
+function renderOptions(
+  containerId,
+  type,
+  appearance,
+  isCustom=false
+){
+
+  const container=
+    document.getElementById(
+      containerId
+    );
+
+
+  container.innerHTML=
+    OPTIONS[type]
+    .map(
+      option=>{
+
+        const selected=
+          appearance[type]
+          ===
+          option.value;
+
+
+        const url=
+          ASSETS[type][
+            option.value
+          ];
+
+
+        return`
+
+        <button
+          class="part-card ${selected ? "selected" : ""}"
+          data-option-type="${type}"
+          data-option-value="${option.value}"
+          data-option-custom="${isCustom ? "yes" : "no"}"
+        >
+
+          ${
+            selected
+            ?
+            '<span class="check">✓</span>'
+            :
+            ''
+          }
+
+          <div class="part-thumb ${optionPreviewClass(type)}">
+
+            <img src="${url}">
+
+          </div>
+
+          <span class="part-label">
+            ${option.label}
+          </span>
+
+        </button>
+
+        `;
+
+      }
+    )
+    .join("");
+
+
+  container
+    .querySelectorAll(
+      ".part-card"
+    )
+    .forEach(
+      button=>{
+
+        button.onclick=()=>{
+
+          const optionType=
+            button.dataset.optionType;
+
+
+          const optionValue=
+            button.dataset.optionValue;
+
+
+          const custom=
+            button.dataset.optionCustom
+            ===
+            "yes";
+
+
+          if(custom){
+
+            customAppearance[
+              optionType
+            ]=
+              optionValue;
+
+
+            renderCustomOptions();
+
+
+          }else{
+
+            draftAppearance[
+              optionType
+            ]=
+              optionValue;
+
+
+            renderCreatorOptions();
+
+          }
+
+
+          syncCharacters();
+
+        };
+
+      }
+    );
+
+}
+
+
+function renderCreatorOptions(){
+
+  renderOptions(
+    "part-options",
+    activePart,
+    draftAppearance,
+    false
+  );
+
+}
+
+
+function renderCustomOptions(){
+
+  renderOptions(
+    "custom-options",
+    activeCustomPart,
+    customAppearance,
+    true
+  );
+
+}
+
+
+document
+.querySelectorAll(
+  "[data-part]"
+)
+.forEach(
+  button=>{
+
+    button.onclick=()=>{
+
+      document
+        .querySelectorAll(
+          "[data-part]"
+        )
+        .forEach(
+          b=>
+            b.classList.remove(
+              "selected"
+            )
+        );
+
+
+      button
+        .classList
+        .add(
+          "selected"
+        );
+
+
+      activePart=
+        button.dataset.part;
+
+
+      renderCreatorOptions();
+
+    };
+
+  }
+);
+
+
+document
+.querySelectorAll(
+  "[data-custom]"
+)
+.forEach(
+  button=>{
+
+    button.onclick=()=>{
+
+      document
+        .querySelectorAll(
+          "[data-custom]"
+        )
+        .forEach(
+          b=>
+            b.classList.remove(
+              "selected"
+            )
+        );
+
+
+      button
+        .classList
+        .add(
+          "selected"
+        );
+
+
+      activeCustomPart=
+        button.dataset.custom;
+
+
+      renderCustomOptions();
+
+    };
+
+  }
+);
+
+
+/* =================================
+   画面切替
+================================= */
+
+const screens=
+  document.querySelectorAll(
+    ".screen"
+  );
+
+
+function showScreen(id){
+
+  screens.forEach(
+    screen=>{
+
+      screen
+        .classList
+        .remove(
+          "active"
+        );
+
+    }
+  );
+
+
+  document
+    .getElementById(id)
+    .classList
+    .add(
+      "active"
+    );
+
+}
+
+
+/* =================================
+   日付
+================================= */
+
+function todayKey(){
+
+  const now=
+    new Date();
+
+
+  return(
+    `${now.getFullYear()}-`
+    +
+    `${now.getMonth()+1}-`
+    +
+    `${now.getDate()}`
+  );
+
+}
+
+
+function updateClock(){
+
+  const now=
+    new Date();
+
+
+  document
+    .getElementById(
+      "home-date"
+    )
+    .textContent=
+    `${now.getMonth()+1}/${now.getDate()}`;
+
+
+  document
+    .getElementById(
+      "home-time"
+    )
+    .textContent=
+    `${String(
+      now.getHours()
+    ).padStart(
+      2,
+      "0"
+    )}:`
+    +
+    `${String(
+      now.getMinutes()
+    ).padStart(
+      2,
+      "0"
+    )}`;
+
+}
+
+
+updateClock();
+
+setInterval(
+  updateClock,
+  1000
+);
+
+
+/* =================================
+   思い出
+================================= */
+
+function memoryDate(){
+
+  const now=
+    new Date();
+
+
+  return(
+    `${now.getFullYear()}/`
+    +
+    `${now.getMonth()+1}/`
+    +
+    `${now.getDate()} `
+    +
+    `${String(
+      now.getHours()
+    ).padStart(
+      2,
+      "0"
+    )}:`
+    +
+    `${String(
+      now.getMinutes()
+    ).padStart(
+      2,
+      "0"
+    )}`
+  );
+
+}
+
+
+function addMemory(text){
+
+  data.memories.push({
+
+    text:text,
+
+    date:
+      memoryDate()
+
+  });
+
+
+  save();
+
+}
+
+
+function renderMemories(){
+
+  const list=
+    document.getElementById(
+      "memory-list"
+    );
+
+
+  if(
+    data.memories.length===0
+  ){
+
+    list.innerHTML=
+      "<p>まだ思い出はないみたい。</p>";
+
+    return;
+
+  }
+
+
+  list.replaceChildren();
+
+  [...data.memories]
+    .reverse()
+    .forEach(item=>{
+      const row=document.createElement("div");
+      row.className="memory-item";
+
+      const date=document.createElement("div");
+      date.className="memory-date";
+      date.textContent=item.date;
+
+      const description=document.createElement("div");
+      description.textContent=item.text;
+
+      row.append(date,description);
+      list.appendChild(row);
+    });
+
+}
+
+
+/* =================================
+   レベル
+================================= */
+
+const requirements=[
+  0,
+  50,
+  130,
+  250,
+  410,
+  610,
+  850,
+  1130,
+  1450,
+  1810
+];
+
+
+function levelInfo(){
+
+  if(
+    data.level>=10
+  ){
+
+    return{
+      percent:100,
+      remaining:0
+    };
+
+  }
+
+
+  const previous=
+    requirements[
+      data.level-1
+    ];
+
+
+  const next=
+    requirements[
+      data.level
+    ];
+
+
+  return{
+
+    percent:
+      Math.max(
+        0,
+        Math.min(
+          100,
+          (
+            (
+              data.xp
+              -
+              previous
+            )
+            /
+            (
+              next
+              -
+              previous
+            )
+          )
+          *
+          100
+        )
+      ),
+
+    remaining:
+      Math.max(
+        0,
+        next-data.xp
+      )
+
+  };
+
+}
+
+
+function updateLevel(){
+
+  document
+    .getElementById(
+      "level"
+    )
+    .textContent=
+    data.level;
+
+
+  const info=
+    levelInfo();
+
+
+  document
+    .getElementById(
+      "home-xp-fill"
+    )
+    .style.width=
+    `${info.percent}%`;
+
+
+  document
+    .getElementById(
+      "home-next-xp"
+    )
+    .textContent=
+    data.level>=10
+    ?
+    "MAX"
+    :
+    `次のLvまで ${info.remaining}`;
+
+}
+
+
+function levelUnlockText(level){
+
+  if(level===2)
+    return"新しい背景が増える予定だよ";
+
+  if(level===3)
+    return"新しいパーツが増える予定だよ";
+
+  if(level===4)
+    return"できることが増えてきたよ";
+
+  if(level===5)
+    return"新しいパーツが増える予定だよ";
+
+  return"";
+
+}
+
+
+function gainXP(amount){
+
+  const oldLevel=
+    data.level;
+
+
+  data.xp+=
+    amount;
+
+
+  let newLevel=
+    1;
+
+
+  for(
+    let i=1;
+    i<requirements.length;
+    i++
+  ){
+
+    if(
+      data.xp
+      >=
+      requirements[i]
+    ){
+
+      newLevel=
+        i+1;
+
+    }
+
+  }
+
+
+  data.level=
+    Math.max(
+      data.level,
+      newLevel
+    );
+
+
+  if(
+    data.level
+    >
+    oldLevel
+  ){
+
+    document
+      .getElementById(
+        "levelup-number"
+      )
+      .textContent=
+      data.level;
+
+
+    document
+      .getElementById(
+        "levelup-unlock"
+      )
+      .textContent=
+      levelUnlockText(
+        data.level
+      );
+
+
+    document
+      .getElementById(
+        "level-overlay"
+      )
+      .classList
+      .remove(
+        "hidden"
+      );
+
+
+    setTimeout(
+      ()=>{
+
+        document
+          .getElementById(
+            "level-overlay"
+          )
+          .classList
+          .add(
+            "hidden"
+          );
+
+      },
+      1800
+    );
+
+  }
+
+
+  updateLevel();
+
+  save();
+
+}
+
+
+/* =================================
+   関係値
+================================= */
+
+function checkRelationMilestones(){
+
+  [
+    20,
+    40,
+    60,
+    80,
+    100
+  ]
+  .forEach(
+    value=>{
+
+      if(
+        data.relation>=value
+        &&
+        !data.reachedRelation.includes(
+          value
+        )
+      ){
+
+        data
+          .reachedRelation
+          .push(
+            value
+          );
+
+
+        addMemory(
+          `関係値が ${value} になった`
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+function dailyRelation(){
+
+  const today=
+    todayKey();
+
+
+  if(
+    data.relationDate
+    !==
+    today
+  ){
+
+    data.relationDate=
+      today;
+
+
+    data.todayRelation=
+      0;
+
+
+    data.relation=
+      Math.min(
+        100,
+        data.relation+6
+      );
+
+
+    checkRelationMilestones();
+
+    save();
+
+  }
+
+}
+
+
+function gainRelation(amount){
+
+  const remaining=
+    3
+    -
+    data.todayRelation;
+
+
+  if(
+    remaining<=0
+  ){
+
+    return 0;
+
+  }
+
+
+  const actual=
+    Math.min(
+      amount,
+      remaining
+    );
+
+
+  data.todayRelation+=
+    actual;
+
+
+  data.relation=
+    Math.min(
+      100,
+      data.relation+actual
+    );
+
+
+  checkRelationMilestones();
+
+  save();
+
+
+  return actual;
+
+}
+
+
+function relationStage(){
+
+  if(data.relation<20)
+    return"まだ知り合ったばかり";
+
+  if(data.relation<40)
+    return"少し慣れてきた";
+
+  if(data.relation<60)
+    return"仲良し";
+
+  if(data.relation<80)
+    return"かなり親しい";
+
+  if(data.relation<100)
+    return"とても大切な存在";
+
+  return"ずっと一緒";
+
+}
+
+
+/* =================================
+   セリフ
+================================= */
+
+let dialogueTimer;
+
+
+function say(text){
+
+  const windowEl=
+    document.querySelector(
+      ".dialogue-window"
+    );
+
+
+  const textEl=
+    document.getElementById(
+      "dialogue"
+    );
+
+
+  textEl.textContent=
+    text;
+
+
+  windowEl
+    .classList
+    .remove(
+      "dialogue-hidden"
+    );
+
+
+  clearTimeout(
+    dialogueTimer
+  );
+
+
+  dialogueTimer=
+    setTimeout(
+      ()=>{
+
+        windowEl
+          .classList
+          .add(
+            "dialogue-hidden"
+          );
+
+      },
+      4000
+    );
+
+}
+
+
+/* =================================
+   行動3択を閉じる
+================================= */
+
+function closeActionPopup(){
+
+  document
+    .getElementById(
+      "action-popup"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+}
+
+
+/* =================================
+   補助表示
+================================= */
+
+function randomItem(array){
+
+  return array[
+    Math.floor(
+      Math.random()
+      *
+      array.length
+    )
+  ];
+
+}
+
+
+function floatGain(lines){
+
+  const box=
+    document.getElementById(
+      "float-feedback"
+    );
+
+
+  box.innerHTML="";
+
+
+  lines
+    .filter(Boolean)
+    .forEach(
+      text=>{
+
+        const item=
+          document.createElement(
+            "div"
+          );
+
+
+        item.className=
+          "float-line";
+
+
+        item.textContent=
+          text;
+
+
+        box.appendChild(
+          item
+        );
+
+      }
+    );
+
+
+  setTimeout(
+    ()=>{
+
+      box.innerHTML="";
+
+    },
+    1500
+  );
+
+}
+
+
+/* =================================
+   初期設定フロー
+================================= */
+
+document
+.getElementById(
+  "to-name"
+)
+.onclick=()=>{
+
+  syncCharacters();
+
+  showScreen(
+    "name-screen"
+  );
+
+};
+
+
+document
+.getElementById(
+  "back-create"
+)
+.onclick=()=>{
+
+  showScreen(
+    "create-screen"
+  );
+
+};
+
+
+document
+.getElementById(
+  "to-user-name"
+)
+.onclick=()=>{
+
+  const name=
+    document
+      .getElementById(
+        "name-input"
+      )
+      .value
+      .trim();
+
+
+  if(!name){
+
+    alert(
+      "名前を入力してね"
+    );
+
+    return;
+
+  }
+
+
+  data.name=
+    name;
+
+
+  showScreen(
+    "user-name-screen"
+  );
+
+};
+
+
+document
+.getElementById(
+  "back-name"
+)
+.onclick=()=>{
+
+  showScreen(
+    "name-screen"
+  );
+
+};
+
+
+document
+.getElementById(
+  "start-game"
+)
+.onclick=()=>{
+
+  const user=
+    document
+      .getElementById(
+        "user-name-input"
+      )
+      .value
+      .trim();
+
+
+  if(!user){
+
+    alert(
+      "あなたの名前を入力してね"
+    );
+
+    return;
+
+  }
+
+
+  data.userName=
+    user;
+
+
+  data.appearance=
+    {
+      ...draftAppearance
+    };
+
+
+  data.created=
+    true;
+
+
+  data.startDate=
+    new Date()
+    .toISOString();
+
+
+  addMemory(
+    `${data.name}と一緒に暮らし始めた`
+  );
+
+
+  save();
+
+
+  syncCharacters();
+
+
+  enterHome();
+
+};
+
+
+/* =================================
+   HOME
+================================= */
+
+function enterHome(){
+
+  dailyRelation();
+
+  updateClock();
+
+  updateLevel();
+
+  syncCharacters();
+
+
+  document
+    .getElementById(
+      "character-name"
+    )
+    .textContent=
+    data.name
+    ||
+    "ゆるとも";
+
+
+  closeActionPopup();
+
+
+  showScreen(
+    "home-screen"
+  );
+
+
+  say(
+    "今日はどうする？"
+  );
+
+}
+
+
+/* =================================
+   話す
+================================= */
+
+document
+.getElementById(
+  "talk-button"
+)
+.onclick=()=>{
+
+  closeActionPopup();
+
+
+  const rel=
+    gainRelation(
+      .2
+    );
+
+
+  gainXP(
+    5
+  );
+
+
+  data.counts.talk++;
+
+
+  say(
+    randomItem(
+      [
+        "今日はどうする？",
+        "のんびりしよっか。",
+        "来てくれたんだね。",
+        "何して過ごそうか〜。"
+      ]
+    )
+  );
+
+
+  floatGain(
+    [
+      rel
+      ?
+      `♡ 親密度 +${rel}`
+      :
+      "",
+
+      "お世話XP +5"
+    ]
+  );
+
+
+  if(
+    !data.firstActions.talk
+  ){
+
+    data.firstActions.talk=
+      true;
+
+
+    addMemory(
+      "初めて話した"
+    );
+
+  }
+
+
+  save();
+
+};
+
+
+/* =================================
+   行動
+================================= */
+
+document
+.getElementById(
+  "action-button"
+)
+.onclick=()=>{
+
+  document
+    .getElementById(
+      "action-popup"
+    )
+    .classList
+    .toggle(
+      "hidden"
+    );
+
+};
+
+
+/* =================================
+   ごはん
+================================= */
+
+document
+.getElementById(
+  "food-button"
+)
+.onclick=()=>{
+
+  /* ★追加：選んだ瞬間3択を閉じる */
+  closeActionPopup();
+
+
+  const rel=
+    gainRelation(
+      .5
+    );
+
+
+  gainXP(
+    10
+  );
+
+
+  data.counts.food++;
+
+
+  say(
+    randomItem(
+      [
+        "一緒に食べるとおいしいね。",
+        "ごちそうさま〜。",
+        "お腹いっぱい。",
+        "今日のごはんもよかったね。"
+      ]
+    )
+  );
+
+
+  floatGain(
+    [
+      rel
+      ?
+      `♡ 親密度 +${rel}`
+      :
+      "",
+
+      "お世話XP +10"
+    ]
+  );
+
+
+  if(
+    !data.firstActions.food
+  ){
+
+    data.firstActions.food=
+      true;
+
+
+    addMemory(
+      "初めて一緒にごはんを食べた"
+    );
+
+  }
+
+
+  save();
+
+};
+
+
+/* =================================
+   遊ぶ
+================================= */
+
+document
+.getElementById(
+  "play-button"
+)
+.onclick=()=>{
+
+  /* ★追加：選んだ瞬間3択を閉じる */
+  closeActionPopup();
+
+
+  showScreen(
+    "play-screen"
+  );
+
+};
+
+
+document
+.querySelectorAll(
+  ".play-choice"
+)
+.forEach(
+  button=>{
+
+    button.onclick=()=>{
+
+      const play=
+        button.dataset.play;
+
+
+      const rel=
+        gainRelation(
+          .5
+        );
+
+
+      gainXP(
+        10
+      );
+
+
+      data.counts.play++;
+
+
+      if(
+        !data.firstActions.play
+      ){
+
+        data.firstActions.play=
+          true;
+
+
+        addMemory(
+          `初めて一緒に遊んだ（${play}）`
+        );
+
+      }
+
+
+      save();
+
+
+      enterHome();
+
+
+      say(
+        `${play}、楽しかったね。`
+      );
+
+
+      floatGain(
+        [
+          rel
+          ?
+          `♡ 親密度 +${rel}`
+          :
+          "",
+
+          "お世話XP +10"
+        ]
+      );
+
+    };
+
+  }
+);
+
+
+/* =================================
+   おでかけ
+================================= */
+
+document
+.getElementById(
+  "outing-button"
+)
+.onclick=()=>{
+
+  /* ★追加：選んだ瞬間3択を閉じる */
+  closeActionPopup();
+
+
+  const place=
+    randomItem(
+      [
+        "街",
+        "公園",
+        "遊園地",
+        "カフェ",
+        "本屋"
+      ]
+    );
+
+
+  const rel=
+    gainRelation(
+      .5
+    );
+
+
+  gainXP(
+    15
+  );
+
+
+  data.counts.outing++;
+
+
+  say(
+    `${place}に行ってきたよ。楽しかったね。`
+  );
+
+
+  floatGain(
+    [
+      rel
+      ?
+      `♡ 親密度 +${rel}`
+      :
+      "",
+
+      "お世話XP +15"
+    ]
+  );
+
+
+  if(
+    !data.firstActions.outing
+  ){
+
+    data.firstActions.outing=
+      true;
+
+
+    addMemory(
+      `初めておでかけした（${place}）`
+    );
+
+  }
+
+
+  save();
+
+};
+
+
+/* =================================
+   日数
+================================= */
+
+function daysTogether(){
+
+  if(
+    !data.startDate
+  ){
+
+    return 1;
+
+  }
+
+
+  return(
+    Math.floor(
+      (
+        new Date()
+        -
+        new Date(
+          data.startDate
+        )
+      )
+      /
+      86400000
+    )
+    +
+    1
+  );
+
+}
+
+
+/* =================================
+   関係画面
+================================= */
+
+document
+.getElementById(
+  "relation-button"
+)
+.onclick=()=>{
+
+  closeActionPopup();
+
+
+  document
+    .getElementById(
+      "relation-name"
+    )
+    .textContent=
+    data.name;
+
+
+  document
+    .getElementById(
+      "relation-value"
+    )
+    .textContent=
+    Math.floor(
+      data.relation
+      *
+      10
+    )
+    /
+    10;
+
+
+  document
+    .getElementById(
+      "relation-stage"
+    )
+    .textContent=
+    relationStage();
+
+
+  document
+    .getElementById(
+      "days-together"
+    )
+    .textContent=
+    daysTogether();
+
+
+  showScreen(
+    "relation-screen"
+  );
+
+};
+
+
+/* =================================
+   思い出
+================================= */
+
+document
+.getElementById(
+  "memory-button"
+)
+.onclick=()=>{
+
+  closeActionPopup();
+
+  renderMemories();
+
+
+  showScreen(
+    "memory-screen"
+  );
+
+};
+
+
+/* =================================
+   着替え
+================================= */
+
+document
+.getElementById(
+  "customize-button"
+)
+.onclick=()=>{
+
+  closeActionPopup();
+
+
+  customAppearance=
+    {
+      ...data.appearance
+    };
+
+
+  document
+    .getElementById(
+      "rename-input"
+    )
+    .value=
+    data.name;
+
+
+  activeCustomPart=
+    "body";
+
+
+  document
+    .querySelectorAll(
+      "[data-custom]"
+    )
+    .forEach(
+      b=>
+        b.classList.remove(
+          "selected"
+        )
+    );
+
+
+  document
+    .querySelector(
+      '[data-custom="body"]'
+    )
+    .classList
+    .add(
+      "selected"
+    );
+
+
+  renderCustomOptions();
+
+  syncCharacters();
+
+
+  showScreen(
+    "customize-screen"
+  );
+
+};
+
+
+document
+.getElementById(
+  "save-customize"
+)
+.onclick=()=>{
+
+  const name=
+    document
+      .getElementById(
+        "rename-input"
+      )
+      .value
+      .trim();
+
+
+  if(name){
+
+    data.name=
+      name;
+
+  }
+
+
+  data.appearance=
+    {
+      ...customAppearance
+    };
+
+
+  save();
+
+
+  syncCharacters();
+
+
+  enterHome();
+
+};
+
+
+/* =================================
+   ユーザー情報
+================================= */
+
+document
+.getElementById(
+  "user-info-button"
+)
+.onclick=()=>{
+
+  closeActionPopup();
+
+
+  document
+    .getElementById(
+      "user-info-name"
+    )
+    .textContent=
+    data.userName;
+
+
+  document
+    .getElementById(
+      "user-info-level"
+    )
+    .textContent=
+    data.level;
+
+
+  document
+    .getElementById(
+      "user-info-xp"
+    )
+    .textContent=
+    data.xp;
+
+
+  /* ★追加：ユーザー情報の経験値バー */
+
+  const xpInfo=
+    levelInfo();
+
+
+  document
+    .getElementById(
+      "user-xp-fill"
+    )
+    .style.width=
+    `${xpInfo.percent}%`;
+
+
+  document
+    .getElementById(
+      "user-xp-next"
+    )
+    .textContent=
+    data.level>=10
+    ?
+    "MAX"
+    :
+    `次のLvまで ${xpInfo.remaining}`;
+
+
+  document
+    .getElementById(
+      "user-info-days"
+    )
+    .textContent=
+    daysTogether();
+
+
+  document
+    .getElementById(
+      "talk-count"
+    )
+    .textContent=
+    data.counts.talk;
+
+
+  document
+    .getElementById(
+      "food-count"
+    )
+    .textContent=
+    data.counts.food;
+
+
+  document
+    .getElementById(
+      "play-count"
+    )
+    .textContent=
+    data.counts.play;
+
+
+  document
+    .getElementById(
+      "outing-count"
+    )
+    .textContent=
+    data.counts.outing;
+
+
+  showScreen(
+    "user-info-screen"
+  );
+
+};
+
+
+/* =================================
+   HOMEへ戻る
+================================= */
+
+document
+.querySelectorAll(
+  ".back-home"
+)
+.forEach(
+  button=>{
+
+    button.onclick=()=>{
+
+      enterHome();
+
+    };
+
+  }
+);
+
+
+/* =================================
+   リセット
+================================= */
+
+document
+.getElementById(
+  "reset-game"
+)
+.onclick=()=>{
+
+  const ok=
+    confirm(
+      "本当に最初から作り直しますか？\n関係・お世話レベル・思い出もすべて消えます。"
+    );
+
+
+  if(!ok)
+    return;
+
+
+  localStorage.removeItem(
+    "yurutomoData"
+  );
+
+
+  data=
+    initialData();
+
+
+  draftAppearance=
+    defaultAppearance();
+
+
+  customAppearance=
+    defaultAppearance();
+
+
+  activePart=
+    "body";
+
+
+  document
+    .getElementById(
+      "name-input"
+    )
+    .value=
+    "";
+
+
+  document
+    .getElementById(
+      "user-name-input"
+    )
+    .value=
+    "";
+
+
+  document
+    .querySelectorAll(
+      "[data-part]"
+    )
+    .forEach(
+      b=>
+        b.classList.remove(
+          "selected"
+        )
+    );
+
+
+  document
+    .querySelector(
+      '[data-part="body"]'
+    )
+    .classList
+    .add(
+      "selected"
+    );
+
+
+  renderCreatorOptions();
+
+  syncCharacters();
+
+
+  showScreen(
+    "create-screen"
+  );
+
+};
+
+
+/* =================================
+   LEVEL UP
+================================= */
+
+document
+.getElementById(
+  "level-overlay"
+)
+.onclick=()=>{
+
+  document
+    .getElementById(
+      "level-overlay"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+};
+
+
+/* =================================
+   起動
+================================= */
+
+renderCreatorOptions();
+
+renderCustomOptions();
+
+syncCharacters();
+
+updateLevel();
+
+
+if(
+  data.created
+){
+
+  enterHome();
+
+}else{
+
+  showScreen(
+    "create-screen"
+  );
+
+}
+
+</script>
+
+</body>
+</html>
