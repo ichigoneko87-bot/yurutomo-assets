@@ -214,6 +214,11 @@ input{
   z-index:2;
 }
 
+.layer-clothes,
+.layer-shoes{
+  z-index:3;
+}
+
 .layer-eyes{
   z-index:3;
 }
@@ -315,6 +320,15 @@ input{
   background:#f3e7f7;
 }
 
+.part-card.locked{
+  opacity:.56;
+  cursor:not-allowed;
+}
+
+.part-card:disabled:active{
+  transform:none;
+}
+
 .part-thumb{
   position:relative;
 
@@ -364,6 +378,43 @@ input{
   font-weight:700;
 
   white-space:nowrap;
+}
+
+.part-status{
+  display:block;
+  margin-top:3px;
+  font-size:10px;
+  color:var(--muted);
+}
+
+.inventory-group{
+  margin:20px 0;
+  text-align:left;
+}
+
+.inventory-group h3{
+  margin:0 0 10px;
+}
+
+.inventory-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:13px 15px;
+  margin-bottom:8px;
+  border-radius:16px;
+  background:white;
+  box-shadow:0 3px 10px rgba(90,65,95,.06);
+}
+
+.inventory-row.unowned{
+  color:var(--muted);
+  background:#f4eff4;
+}
+
+.inventory-row span:last-child{
+  white-space:nowrap;
+  font-size:12px;
 }
 
 .check{
@@ -1130,6 +1181,25 @@ input{
 
   font-size:11px;
 }
+
+.inventory-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.inventory-part{
+  padding:10px 4px;
+  border-radius:20px;
+  background:#f7f1f8;
+  text-align:center;
+}
+.inventory-part.unowned{opacity:.56;}
+.inventory-part > span{
+  display:block;
+  margin-top:7px;
+  font-size:11px;
+  color:var(--muted);
+}
 </style>
 </head>
 
@@ -1156,6 +1226,8 @@ input{
 
       <img class="character-layer layer-back">
       <img class="character-layer layer-body">
+      <img class="character-layer layer-clothes">
+      <img class="character-layer layer-shoes">
       <img class="character-layer layer-eyes">
       <img class="character-layer layer-mouth">
       <img class="character-layer layer-front">
@@ -1188,6 +1260,10 @@ input{
   <button class="tab" data-part="mouth">
     口
   </button>
+
+
+  <button class="tab" data-part="clothes">服</button>
+  <button class="tab" data-part="shoes">靴</button>
 
 </div>
 
@@ -1227,6 +1303,8 @@ input{
 
       <img class="character-layer layer-back">
       <img class="character-layer layer-body">
+      <img class="character-layer layer-clothes">
+      <img class="character-layer layer-shoes">
       <img class="character-layer layer-eyes">
       <img class="character-layer layer-mouth">
       <img class="character-layer layer-front">
@@ -1357,6 +1435,8 @@ input{
 
   <img class="character-layer layer-back">
   <img class="character-layer layer-body">
+      <img class="character-layer layer-clothes">
+      <img class="character-layer layer-shoes">
   <img class="character-layer layer-eyes">
   <img class="character-layer layer-mouth">
   <img class="character-layer layer-front">
@@ -1691,6 +1771,8 @@ input{
 
       <img class="character-layer layer-back">
       <img class="character-layer layer-body">
+      <img class="character-layer layer-clothes">
+      <img class="character-layer layer-shoes">
       <img class="character-layer layer-eyes">
       <img class="character-layer layer-mouth">
       <img class="character-layer layer-front">
@@ -1749,12 +1831,20 @@ input{
     口
   </button>
 
+
+  <button class="tab" data-custom="clothes">服</button>
+  <button class="tab" data-custom="shoes">靴</button>
+
 </div>
 
 <div
   id="custom-options"
   class="part-options"
 ></div>
+
+<button id="inventory-button" class="back-btn">
+所持パーツを見る
+</button>
 
 <button
   id="save-customize"
@@ -1773,6 +1863,23 @@ input{
 <button class="back-home back-btn">
 もどる
 </button>
+
+</section>
+
+
+<!-- =================================
+     所持パーツ
+================================= -->
+
+<section id="inventory-screen" class="screen panel-screen">
+
+<h1>パーツ一覧</h1>
+
+<p>持っているパーツと、これから手に入るパーツ</p>
+
+<div id="inventory-list"></div>
+
+<button id="back-customize" class="back-btn">着替えにもどる</button>
 
 </section>
 
@@ -1920,6 +2027,14 @@ input{
 
 </div>
 
+<div class="card">
+  <h3>データのバックアップ</h3>
+  <p>機種変更に備えて、育成データをファイルに保存できます。</p>
+  <button id="export-save" class="back-btn">データを書き出す</button>
+  <button id="import-save" class="back-btn">データを読み込む</button>
+  <input id="import-file" class="hidden" type="file" accept=".json,application/json">
+</div>
+
 <button class="back-home back-btn">
 もどる
 </button>
@@ -1970,6 +2085,9 @@ input{
 
 const ASSETS={
 
+  clothes:{none:"", pinkDress:"https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/pink_dress.png"},
+  shoes:{none:"", brown:"https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/brown_shoes.png"},
+
   body:{
     default:
     "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/body.png"
@@ -1998,6 +2116,8 @@ const ASSETS={
     droopy:
     "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/droopy_eyes.png",
 
+    yellow:"https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/yellow_eyes.png",
+
     upturned:
     "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/upturned_eyes.png"
 
@@ -2012,6 +2132,8 @@ const ASSETS={
     smile:
     "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/smile%20closed_mouth.png",
 
+    animal:"https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/animal_mouth.png",
+
     shun:
     "https://raw.githubusercontent.com/ichigoneko87-bot/yurutomo-assets/refs/heads/main/shun_mouth.png"
 
@@ -2025,6 +2147,9 @@ const ASSETS={
 ================================= */
 
 const OPTIONS={
+
+  clothes:[{value:"none",label:"なし"},{value:"pinkDress",label:"ピンクの服"}],
+  shoes:[{value:"none",label:"なし"},{value:"brown",label:"茶色の靴"}],
 
   body:[
     {
@@ -2060,6 +2185,7 @@ const OPTIONS={
   ],
 
   eyes:[
+    {value:"yellow",label:"黄色の目"},
     {
       value:"none",
       label:"なし"
@@ -2079,6 +2205,7 @@ const OPTIONS={
   ],
 
   mouth:[
+    {value:"animal",label:"どうぶつ口"},
     {
       value:"none",
       label:"なし"
@@ -2099,10 +2226,62 @@ const OPTIONS={
 
 };
 
+const PART_NAMES={
+  clothes:"服",
+  shoes:"靴",
+  body:"からだ",
+  back:"後ろ髪",
+  front:"前髪",
+  eyes:"目",
+  mouth:"口"
+};
+
+// 既存のパーツは、以前から遊んでいる人も全て所持済みにする。
+// 新しいパーツはここに追加しなければ、未所持として一覧に表示される。
+const STARTER_PARTS={
+  clothes:["pinkDress"],
+  shoes:["brown"],
+  body:["default"],
+  back:["long"],
+  front:["bangs","pinkTwintail"],
+  eyes:["gentle","droopy","upturned","yellow"],
+  mouth:["speaking","smile","shun","animal"]
+};
+
+function initialOwnedParts(){
+  return Object.fromEntries(
+    Object.entries(STARTER_PARTS).map(([type,values])=>[type,[...values]])
+  );
+}
+
+function normalizeOwnedParts(owned,appearance){
+  const result=initialOwnedParts();
+
+  for(const type of Object.keys(OPTIONS)){
+    const valid=new Set(OPTIONS[type].map(option=>option.value));
+    const saved=Array.isArray(owned?.[type]) ? owned[type] : [];
+    const selected=appearance?.[type];
+    result[type]=[...new Set([
+      ...(result[type] || []),
+      ...saved.filter(value=>typeof value==="string" && valid.has(value)),
+      ...(valid.has(selected) ? [selected] : [])
+    ])];
+  }
+
+  return result;
+}
+
+function ownsPart(type,value){
+  return value==="none" || data.ownedParts[type]?.includes(value)===true;
+}
+
 
 function defaultAppearance(){
 
   return{
+
+    clothes:"none",
+    shoes:"none",
 
     body:"default",
 
@@ -2135,6 +2314,9 @@ function initialData(){
 
     appearance:
       defaultAppearance(),
+
+    ownedParts:
+      initialOwnedParts(),
 
     relation:0,
 
@@ -2203,6 +2385,8 @@ data.appearance={
   ...(data.appearance || {})
 };
 
+data.ownedParts=normalizeOwnedParts(data.ownedParts,data.appearance);
+
 data.memories ??=[];
 
 data.counts ??={
@@ -2240,6 +2424,131 @@ function save(){
   );
 
 }
+
+/* =================================
+   セーブデータの書き出し・読み込み
+================================= */
+
+document.getElementById("export-save").onclick=()=>{
+  try{
+    save();
+    const backup={
+      format:"yurutomo-save",
+      version:1,
+      exportedAt:new Date().toISOString(),
+      data
+    };
+    const blob=new Blob([JSON.stringify(backup,null,2)],{
+      type:"application/json"
+    });
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement("a");
+    link.href=url;
+    link.download=`yurutomo-save-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(error){
+    alert("データを書き出せませんでした。もう一度試してね。");
+  }
+};
+
+const importFile=document.getElementById("import-file");
+
+document.getElementById("import-save").onclick=()=>{
+  importFile.click();
+};
+
+function validBackup(source){
+  if(!source || source.format!=="yurutomo-save" || source.version!==1){
+    throw new Error("別の形式のファイルです");
+  }
+
+  const saved=source.data;
+  if(!saved || typeof saved!=="object" || Array.isArray(saved) ||
+     typeof saved.created!=="boolean" ||
+     typeof saved.name!=="string" || typeof saved.userName!=="string" ||
+     !saved.appearance || typeof saved.appearance!=="object" ||
+     !Array.isArray(saved.memories) || saved.memories.length>10000 ||
+     !saved.counts || typeof saved.counts!=="object" ||
+     !saved.firstActions || typeof saved.firstActions!=="object" ||
+     !Array.isArray(saved.reachedRelation) ||
+     typeof saved.relationDate!=="string" ||
+     !(saved.startDate===null || typeof saved.startDate==="string")){
+    throw new Error("データが不足しています");
+  }
+
+  const importedAppearance={...defaultAppearance(),...saved.appearance};
+  for(const type of Object.keys(defaultAppearance())){
+    if(!OPTIONS[type].some(option=>option.value===importedAppearance[type])){
+      throw new Error("未対応のパーツがあります");
+    }
+  }
+
+  for(const key of ["relation","todayRelation","xp","level"]){
+    if(!Number.isFinite(saved[key]) || saved[key]<0){
+      throw new Error("数値データが正しくありません");
+    }
+  }
+  if(saved.relation>100 || saved.todayRelation>3 ||
+     !Number.isInteger(saved.level) || saved.level<1 || saved.level>10){
+    throw new Error("数値データが正しくありません");
+  }
+
+  for(const key of ["talk","food","play","outing"]){
+    if(!Number.isSafeInteger(saved.counts[key]) || saved.counts[key]<0 ||
+       typeof saved.firstActions[key]!=="boolean"){
+      throw new Error("行動データが正しくありません");
+    }
+  }
+
+  if(!saved.memories.every(item=>item && typeof item.text==="string" &&
+       typeof item.date==="string") ||
+     !saved.reachedRelation.every(value=>[20,40,60,80,100].includes(value))){
+    throw new Error("思い出データが正しくありません");
+  }
+
+  return{
+    ...initialData(),
+    created:saved.created,
+    name:saved.name,
+    userName:saved.userName,
+    appearance:importedAppearance,
+    ownedParts:normalizeOwnedParts(saved.ownedParts,importedAppearance),
+    relation:saved.relation,
+    todayRelation:saved.todayRelation,
+    relationDate:saved.relationDate,
+    xp:saved.xp,
+    level:saved.level,
+    startDate:saved.startDate,
+    memories:saved.memories.map(item=>({text:item.text,date:item.date})),
+    counts:{...saved.counts},
+    firstActions:{...saved.firstActions},
+    reachedRelation:[...saved.reachedRelation]
+  };
+}
+
+importFile.onchange=async()=>{
+  const file=importFile.files?.[0];
+  if(!file) return;
+
+  try{
+    if(file.size>1024*1024){
+      throw new Error("ファイルが大きすぎます");
+    }
+    const imported=validBackup(JSON.parse(await file.text()));
+    if(!confirm("現在のゆるとものデータを、選んだファイルのデータで上書きします。よろしいですか？")){
+      return;
+    }
+    localStorage.setItem("yurutomoData",JSON.stringify(imported));
+    location.reload();
+  }catch(error){
+    alert(`読み込めませんでした：${error.message}`);
+  }finally{
+    importFile.value="";
+  }
+};
 
 
 /* =================================
@@ -2304,6 +2613,8 @@ function applyAppearance(
     ];
 
 
+  setLayer("clothes");
+  setLayer("shoes");
   setLayer("eyes");
   setLayer("mouth");
   setLayer("front");
@@ -2389,6 +2700,8 @@ function renderOptions(
           ===
           option.value;
 
+        const owned=ownsPart(type,option.value);
+
 
         const url=
           ASSETS[type][
@@ -2399,10 +2712,12 @@ function renderOptions(
         return`
 
         <button
-          class="part-card ${selected ? "selected" : ""}"
+          class="part-card ${selected ? "selected" : ""} ${owned ? "" : "locked"}"
+          aria-label="${option.label}"
           data-option-type="${type}"
           data-option-value="${option.value}"
           data-option-custom="${isCustom ? "yes" : "no"}"
+          ${owned ? "" : "disabled"}
         >
 
           ${
@@ -2419,9 +2734,8 @@ function renderOptions(
 
           </div>
 
-          <span class="part-label">
-            ${option.label}
-          </span>
+
+          ${owned ? "" : '<span class="part-status">未所持</span>'}
 
         </button>
 
@@ -2487,6 +2801,58 @@ function renderOptions(
     );
 
 }
+
+function renderInventory(){
+  const list=document.getElementById("inventory-list");
+  list.replaceChildren();
+
+  for(const [type,options] of Object.entries(OPTIONS)){
+    const group=document.createElement("div");
+    group.className="inventory-group";
+
+    const heading=document.createElement("h3");
+    heading.textContent=PART_NAMES[type] || type;
+    group.appendChild(heading);
+
+    const grid=document.createElement("div");
+    grid.className="inventory-grid";
+
+    for(const option of options){
+      const owned=ownsPart(type,option.value);
+      const row=document.createElement("div");
+      row.className=`inventory-part ${owned ? "" : "unowned"}`;
+      row.setAttribute("aria-label",option.label);
+      const thumb=document.createElement("div");
+      const url=ASSETS[type][option.value];
+      thumb.className=`part-thumb ${optionPreviewClass(type)} ${url ? "" : "empty-thumb"}`;
+      if(url){
+        const image=document.createElement("img");
+        image.src=url;
+        image.alt="";
+        thumb.appendChild(image);
+      }else{
+        thumb.textContent="—";
+      }
+      const status=document.createElement("span");
+      status.textContent=owned ? "所持済み" : "未所持";
+
+      row.append(thumb,status);
+      grid.appendChild(row);
+    }
+
+    group.appendChild(grid);
+    list.appendChild(group);
+  }
+}
+
+document.getElementById("inventory-button").onclick=()=>{
+  renderInventory();
+  showScreen("inventory-screen");
+};
+
+document.getElementById("back-customize").onclick=()=>{
+  showScreen("customize-screen");
+};
 
 
 function renderCreatorOptions(){
